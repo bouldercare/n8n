@@ -183,6 +183,7 @@ export interface IExecutionBase {
 export interface IExecutionDb extends IExecutionBase {
 	data: IRunExecutionData;
 	waitTill?: Date | null;
+	resumeId?: string;
 	workflowData?: IWorkflowBase;
 }
 
@@ -197,6 +198,7 @@ export interface IExecutionResponse extends IExecutionBase {
 	retryOf?: string;
 	retrySuccessId?: string;
 	waitTill?: Date | null;
+	resumeId?: string;
 	workflowData: IWorkflowBase;
 }
 
@@ -211,6 +213,7 @@ export interface IExecutionFlattedDb extends IExecutionBase {
 	id: string;
 	data: string;
 	waitTill?: Date | null;
+	resumeId?: string;
 	workflowData: Omit<IWorkflowBase, 'pinData'>;
 	status: ExecutionStatus;
 }

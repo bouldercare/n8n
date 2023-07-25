@@ -40,6 +40,7 @@ import { MigrateIntegerKeysToString1690000000000 } from './1690000000000-Migrate
 import { SeparateExecutionData1690000000020 } from './1690000000020-SeparateExecutionData';
 import { RemoveSkipOwnerSetup1681134145997 } from './1681134145997-RemoveSkipOwnerSetup';
 import { RemoveResetPasswordColumns1690000000030 } from '../common/1690000000030-RemoveResetPasswordColumns';
+import { AddResumeId1690239578447 } from './1690239578447-AddResumeId';
 
 export const postgresMigrations: Migration[] = [
 	InitialMigration1587669153312,
@@ -83,4 +84,5 @@ export const postgresMigrations: Migration[] = [
 	SeparateExecutionData1690000000020,
 	RemoveSkipOwnerSetup1681134145997,
 	RemoveResetPasswordColumns1690000000030,
+	AddResumeId1690239578447,
 ];

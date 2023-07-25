@@ -2531,10 +2531,19 @@ export function getExecuteFunctions(
 			},
 			prepareOutputData: NodeHelpers.prepareOutputData,
 			binaryToBuffer,
-			async putExecutionToWait(waitTill: Date): Promise<void> {
+			async putExecutionToWait(waitTill: Date, resumeId?: string): Promise<void> {
 				runExecutionData.waitTill = waitTill;
+				runExecutionData.resumeId = resumeId;
 				if (additionalData.setExecutionStatus) {
 					additionalData.setExecutionStatus('waiting');
+				}
+			},
+			async resumeExecution(
+				executionInfo: { executionId?: string; resumeId?: string },
+				when: Date,
+			) {
+				if (additionalData.resumeExecution) {
+					return additionalData.resumeExecution(executionInfo, when);
 				}
 			},
 			sendMessageToUI(...args: any[]): void {

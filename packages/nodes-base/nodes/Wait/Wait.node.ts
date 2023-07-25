@@ -26,6 +26,12 @@ const displayOnWebhook: IDisplayOptions = {
 	},
 };
 
+const displayOnWebhookOrResumeNode: IDisplayOptions = {
+	show: {
+		resume: ['webhook', 'resumeNode'],
+	},
+};
+
 export class Wait extends Webhook {
 	authPropertyName = 'incomingAuthentication';
 
@@ -71,6 +77,11 @@ export class Wait extends Webhook {
 						name: 'On Webhook Call',
 						value: 'webhook',
 						description: 'Waits for a webhook call before continuing',
+					},
+					{
+						name: 'Using Resume Node',
+						value: 'resumeNode',
+						description: 'Waits for a Resume Node to continue',
 					},
 				],
 				default: 'timeInterval',
@@ -191,6 +202,34 @@ export class Wait extends Webhook {
 					},
 				},
 			},
+			// ----------------------------------
+			//         resume:resumeNode
+			// ----------------------------------
+			{
+				displayName:
+					'Use a Resume Node in a separate workflow execution to manually wake this execution. This allows you to use the full range of Trigger Nodes to cause execution to continue.',
+				name: 'resumeNodeNotice',
+				type: 'notice',
+				displayOptions: {
+					show: {
+						resume: ['resumeNode'],
+					},
+				},
+				default: '',
+			},
+			{
+				displayName: 'Resume ID',
+				name: 'resumeId',
+				type: 'string',
+				description:
+					'Optionally, use an expression to associate an external ID with this execution. This can be used in the Resume Node to wake this execution without having to know the Execution ID.',
+				displayOptions: {
+					show: {
+						resume: ['resumeNode'],
+					},
+				},
+				default: '',
+			},
 			{
 				displayName: 'Limit Wait Time',
 				name: 'limitWaitTime',
@@ -199,7 +238,7 @@ export class Wait extends Webhook {
 				// eslint-disable-next-line n8n-nodes-base/node-param-description-boolean-without-whether
 				description:
 					'If no webhook call is received, the workflow will automatically resume execution after the specified limit type',
-				displayOptions: displayOnWebhook,
+				displayOptions: displayOnWebhookOrResumeNode,
 			},
 			{
 				displayName: 'Limit Type',
@@ -211,7 +250,7 @@ export class Wait extends Webhook {
 				displayOptions: {
 					show: {
 						limitWaitTime: [true],
-						...displayOnWebhook.show,
+						...displayOnWebhookOrResumeNode.show,
 					},
 				},
 				options: [
@@ -235,7 +274,7 @@ export class Wait extends Webhook {
 					show: {
 						limitType: ['afterTimeInterval'],
 						limitWaitTime: [true],
-						...displayOnWebhook.show,
+						...displayOnWebhookOrResumeNode.show,
 					},
 				},
 				typeOptions: {
@@ -253,7 +292,7 @@ export class Wait extends Webhook {
 					show: {
 						limitType: ['afterTimeInterval'],
 						limitWaitTime: [true],
-						...displayOnWebhook.show,
+						...displayOnWebhookOrResumeNode.show,
 					},
 				},
 				options: [
@@ -285,7 +324,7 @@ export class Wait extends Webhook {
 					show: {
 						limitType: ['atSpecifiedTime'],
 						limitWaitTime: [true],
-						...displayOnWebhook.show,
+						...displayOnWebhookOrResumeNode.show,
 					},
 				},
 				default: '',
@@ -314,7 +353,10 @@ export class Wait extends Webhook {
 		const resume = context.getNodeParameter('resume', 0) as string;
 
 		if (resume === 'webhook') {
-			return this.handleWebhookResume(context);
+			return this.handleWebhookOrNodeResume(context);
+		} else if (resume === 'resumeNode') {
+			const resumeId = context.getNodeParameter('resumeId', 0) as string;
+			return this.handleWebhookOrNodeResume(context, resumeId);
 		}
 
 		let waitTill: Date;
@@ -358,7 +400,7 @@ export class Wait extends Webhook {
 		return this.putToWait(context, waitTill);
 	}
 
-	private async handleWebhookResume(context: IExecuteFunctions) {
+	private async handleWebhookOrNodeResume(context: IExecuteFunctions, resumeId?: string) {
 		let waitTill = new Date(WAIT_TIME_UNLIMITED);
 
 		const limitWaitTime = context.getNodeParameter('limitWaitTime', 0);
@@ -385,12 +427,11 @@ export class Wait extends Webhook {
 				waitTill = new Date(context.getNodeParameter('maxDateAndTime', 0) as string);
 			}
 		}
-
-		return this.putToWait(context, waitTill);
+		return this.putToWait(context, waitTill, resumeId);
 	}
 
-	private async putToWait(context: IExecuteFunctions, waitTill: Date) {
-		await context.putExecutionToWait(waitTill);
+	private async putToWait(context: IExecuteFunctions, waitTill: Date, resumeId?: string) {
+		await context.putExecutionToWait(waitTill, resumeId);
 		return [context.getInputData()];
 	}
 }

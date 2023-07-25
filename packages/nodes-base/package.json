@@ -653,6 +653,7 @@
       "dist/nodes/Redis/RedisTrigger.node.js",
       "dist/nodes/RenameKeys/RenameKeys.node.js",
       "dist/nodes/RespondToWebhook/RespondToWebhook.node.js",
+      "dist/nodes/Resume/Resume.node.js",
       "dist/nodes/Rocketchat/Rocketchat.node.js",
       "dist/nodes/RssFeedRead/RssFeedRead.node.js",
       "dist/nodes/Rundeck/Rundeck.node.js",

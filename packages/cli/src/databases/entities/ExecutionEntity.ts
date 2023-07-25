@@ -55,6 +55,9 @@ export class ExecutionEntity {
 	@Column({ type: datetimeColumnType, nullable: true })
 	waitTill: Date | null;
 
+	@Column({ nullable: true })
+	resumeId: string;
+
 	@OneToMany('ExecutionMetadata', 'execution')
 	metadata: ExecutionMetadata[];
 

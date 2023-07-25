@@ -45,7 +45,7 @@ import {
 import pick from 'lodash/pick';
 import { Container } from 'typedi';
 import type { FindOptionsWhere } from 'typeorm';
-import { LessThanOrEqual, In } from 'typeorm';
+import { LessThanOrEqual, In, Equal } from 'typeorm';
 import { DateUtils } from 'typeorm/util/DateUtils';
 import config from '@/config';
 import * as Db from '@/Db';
@@ -637,6 +637,7 @@ function hookFunctionsSave(parentProcessMode?: string): IWorkflowExecuteHooks {
 						stoppedAt: fullRunData.stoppedAt,
 						workflowData: pristineWorkflowData,
 						waitTill: fullRunData.waitTill,
+						resumeId: fullRunData.resumeId,
 						status: workflowStatusFinal,
 					};
 
@@ -1133,6 +1134,35 @@ export function sendMessageToUI(source: string, messages: any[]) {
 	}
 }
 
+export async function resumeExecution(
+	executionInfo: { executionId?: string; resumeId?: string },
+	when: Date,
+): Promise<void> {
+	if (executionInfo.executionId) {
+		await Container.get(ExecutionRepository).update(
+			{
+				status: 'waiting',
+				finished: false,
+				id: executionInfo.executionId,
+			},
+			{
+				waitTill: when,
+			},
+		);
+	} else if (executionInfo.resumeId) {
+		await Container.get(ExecutionRepository).update(
+			{
+				status: 'waiting',
+				finished: false,
+				resumeId: executionInfo.resumeId,
+			},
+			{
+				waitTill: when,
+			},
+		);
+	}
+}
+
 /**
  * Returns the base additional data without webhooks
  *
@@ -1167,6 +1197,7 @@ export async function getBase(
 		currentNodeParameters,
 		executionTimeoutTimestamp,
 		userId,
+		resumeExecution,
 		setExecutionStatus,
 		variables,
 	};

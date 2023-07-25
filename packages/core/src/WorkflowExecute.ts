@@ -1592,6 +1592,7 @@ export class WorkflowExecute {
 				workflowId: workflow.id,
 			});
 			fullRunData.waitTill = this.runExecutionData.waitTill;
+			fullRunData.resumeId = this.runExecutionData.resumeId;
 			fullRunData.status = 'waiting';
 		} else {
 			Logger.verbose('Workflow execution finished successfully', { workflowId: workflow.id });

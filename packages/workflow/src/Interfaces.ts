@@ -761,7 +761,11 @@ export type IExecuteFunctions = ExecuteFunctions.GetNodeParameterFn &
 			outputData: INodeExecutionData[],
 			outputIndex?: number,
 		): Promise<INodeExecutionData[][]>;
-		putExecutionToWait(waitTill: Date): Promise<void>;
+		putExecutionToWait(waitTill: Date, resumeId?: string): Promise<void>;
+		resumeExecution(
+			executionInfo: { executionId?: string; resumeId?: string },
+			when: Date,
+		): Promise<void>;
 		sendMessageToUI(message: any): void;
 		sendResponse(response: IExecuteResponsePromiseData): void;
 
@@ -1606,6 +1610,7 @@ export interface IRun {
 	finished?: boolean;
 	mode: WorkflowExecuteMode;
 	waitTill?: Date | null;
+	resumeId?: string;
 	startedAt: Date;
 	stoppedAt?: Date;
 	status: ExecutionStatus;
@@ -1633,6 +1638,7 @@ export interface IRunExecutionData {
 		waitingExecutionSource: IWaitingForExecutionSource | null;
 	};
 	waitTill?: Date;
+	resumeId?: string;
 }
 
 export interface IRunData {
@@ -1742,6 +1748,10 @@ export interface IWorkflowExecuteAdditionalData {
 	httpRequest?: express.Request;
 	restApiUrl: string;
 	instanceBaseUrl: string;
+	resumeExecution?: (
+		executionInfo: { executionId?: string; resumeId?: string },
+		when: Date,
+	) => Promise<void>;
 	setExecutionStatus?: (status: ExecutionStatus) => void;
 	sendMessageToUI?: (source: string, message: any) => void;
 	timezone: string;
@@ -1979,6 +1989,7 @@ export interface IExecutionsSummary {
 	retryOf?: string | null;
 	retrySuccessId?: string | null;
 	waitTill?: Date;
+	resumeId?: string;
 	startedAt: Date;
 	stoppedAt?: Date;
 	workflowId: string;
